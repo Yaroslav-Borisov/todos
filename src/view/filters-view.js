@@ -1,28 +1,28 @@
 import { FilterType } from "../utils/consts.js"
 import AbstractView from "./abstract-view.js"
 
-const createFiltersTemplate = () => {
+const createFiltersTemplate = (filterType) => {
     return `<aside class="app-filters">
                 <section class="toggle-group">
-                <button class="button button--primary" data-name="all">All</button>
-                <button class="button" data-name="active">Active</button>
-                <button class="button" data-name="done">Done</button>
+                <button class='${filterType === 'all' ? 'button button--primary' : 'button'}' data-name="all">All</button>
+                <button class='${filterType === 'active' ? 'button button--primary' : 'button'}' data-name="active">Active</button>
+                <button class='${filterType === 'done' ? 'button button--primary' : 'button'}' data-name="done">Done</button>
                 </section>
             </aside>`
 }
 
 export default class FiltersView extends AbstractView {
-    #todoItemsModel = null
+    #activeFilter = null
     #filterName = FilterType.DEFAULT
     _callback = {}
 
-    constructor(todoItemsModel) {
+    constructor(filterType) {
         super()
-        this.#todoItemsModel = todoItemsModel
+        this.#activeFilter = filterType
     }
 
     get template() {
-        return createFiltersTemplate()
+        return createFiltersTemplate(this.#activeFilter)
     }
 
     setFilterClickHandler = (callback) => {
@@ -37,14 +37,6 @@ export default class FiltersView extends AbstractView {
 
     #filterClickHandler = (evt) => {
         evt.preventDefault()
-
-        const filters = this.element.querySelectorAll('.button')
-        filters.forEach((filter) => {
-            filter.classList.remove('button--primary')
-        })
-
-        evt.target.classList.add('button--primary')
-
         const filterName = evt.target.getAttribute('data-name')
         this.#filterName = filterName
         this._callback.filterClick?.(this.#filterName)

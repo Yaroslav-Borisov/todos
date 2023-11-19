@@ -1,74 +1,86 @@
+import TodoItemsModel from "../model/todo-items-model.js"
 import { FilterType, RenderPosition } from "../utils/consts.js"
 import { render } from "../utils/utils.js"
 import FiltersView from "../view/filters-view.js"
 import FooterView from "../view/footer-view.js"
+import HeaderView from "../view/header-view.js"
+import MainView from "../view/main-view.js"
 import TodoFormView from "../view/todo-form.js"
 import TodoItemView from "../view/todo-item-view.js"
 import TodoListView from "../view/todo-list-view.js"
 
+const app = document.querySelector('#app')
+
 export default class TodoListPresenter {
-    #todoItemsModel = null
-    #mainComponent = null
-    #todoList = []
+
+    #todoItemsModel = new TodoItemsModel()
+    #headerComponent = new HeaderView()
+    #mainComponent = new MainView()
     #filtersComponent = null
     #todoListComponent = new TodoListView()
     #footerComponent = null
     #todoFormComponent = null
 
+    #todoItemsList = []
     #filterType = FilterType.DEFAULT
     #formOpenMode = false
 
-    constructor(todoItemsModel, mainComponent) {
-        this.#todoItemsModel = todoItemsModel
+    constructor() {
+        this.#todoItemsModel.subscribe(this.#renderFilters)
+        this.#todoItemsModel.subscribe(this.#initFiltersEvents)
         this.#todoItemsModel.subscribe(this.#renderTodoList)
-        this.#mainComponent = mainComponent
-        this.#filtersComponent = new FiltersView(todoItemsModel)
-        this.#footerComponent = new FooterView(todoItemsModel)
+        this.#todoItemsModel.subscribe(this.#renderForm)
+        this.#todoItemsModel.subscribe(this.#renderFooter)
 
-    }
-
-    get filteredList() {
-        switch (this.#filterType) {
-            case FilterType.DEFAULT:
-                this.#todoList = this.#todoItemsModel.todoItems
-                break
-            case FilterType.ACTIVE:
-                this.#todoList = this.#todoItemsModel.todoItems.filter(item => item.done === false)
-                break
-            case FilterType.DONE:
-                this.#todoList = this.#todoItemsModel.todoItems.filter(item => item.done === true)
-                break
-        }
-
-        return this.#todoList
+        this.#todoItemsList = this.#todoItemsModel.todoItems
     }
 
     init = () => {
+        this.#renderApp()
+    }
+
+    #renderApp = () => {
+        this.#renderHeader()
+        this.#renderMain()
         this.#renderFilters()
         this.#renderTodoListContainer()
         this.#renderTodoList()
-        this.#initFiltersEvents()
         this.#renderForm()
         this.#initFormEvents()
         this.#renderFooter()
     }
 
+    #renderHeader = () => {
+        render(app, this.#headerComponent, RenderPosition.BEFOREEND)
+    }
+
+    #renderMain = () => {
+        render(app, this.#mainComponent, RenderPosition.BEFOREEND)
+    }
+
     #renderFilters = () => {
+        if (this.#filtersComponent !== null) {
+            this.#filtersComponent.removeElement()
+        }
+
+        this.#filtersComponent = new FiltersView(this.#filterType)
         render(this.#mainComponent, this.#filtersComponent, RenderPosition.BEFOREBEGIN)
-        this.#filtersComponent.setFilterClickHandler()
+        this.#initFiltersEvents()
     }
 
     #renderTodoListContainer = () => {
         render(this.#mainComponent, this.#todoListComponent, RenderPosition.BEFOREEND)
     }
-    
+
     #renderTodoList = () => {
         if (this.#todoListComponent !== null) {
-            this.#todoListComponent.clearTodoList()
+            this.#todoListComponent.removeElement()
+            this.#todoListComponent = new TodoListView()
+            this.#renderTodoListContainer()
+        }
 
-            for (let i = 0; i < this.filteredList.length; i++) {
-                this.#renderTodoItem(this.filteredList[i])
-            }
+        for (let i = 0; i < this.#todoItemsList.length; i++) {
+            this.#renderTodoItem(this.#todoItemsList[i])
         }
     }
 
@@ -86,21 +98,27 @@ export default class TodoListPresenter {
     }
 
     #renderFooter = () => {
+        if (this.#footerComponent !== null) {
+            this.#footerComponent.removeElement()
+        }
+
+        this.#footerComponent = new FooterView(this.#todoItemsModel)
         render(this.#mainComponent, this.#footerComponent, RenderPosition.AFTEREND)
     }
 
     #renderForm = () => {
         if (this.#todoFormComponent !== null) {
-            this.#todoFormComponent.clearForm()
+            this.#todoFormComponent.removeElement()
         }
+
         this.#todoFormComponent = new TodoFormView(this.#formOpenMode)
         render(this.#mainComponent, this.#todoFormComponent, RenderPosition.BEFOREEND)
+        this.#initFormEvents()
     }
 
     #initFiltersEvents = () => {
         this.#filtersComponent.setFilterClickHandler((filterName) => {
-            this.#filterType = filterName
-            this.#renderTodoList()
+            this.#todoItemsModel.setfilterType(filterName)
         })
     }
 
@@ -111,7 +129,6 @@ export default class TodoListPresenter {
     #changeFormMode = () => {
         this.#formOpenMode = !this.#formOpenMode
         console.log(this.#formOpenMode)
-        this.#renderForm()
     }
 
 

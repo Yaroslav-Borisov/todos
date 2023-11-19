@@ -10,4 +10,8 @@ export default class MainView extends AbstractView {
     get template() {
         return createMainTemplate()
     }
+
+    clear = () => {
+        this.element.innerHTML = ''
+    }
 }

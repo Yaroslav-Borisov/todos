@@ -34,29 +34,13 @@ export default class TodoFormView extends AbstractView {
     }
 
     setOpenFormClickHandler = (callback) => {
-        this._callback.openFormClick = () => {
-            callback
-
-            this.setCloseFormClickHandler()
-        }
+        this._callback.openFormClick = callback
         this.element.querySelector('.add-todo__show-form-button').addEventListener('click', this.#openFormClickHandler)
-    }
-
-    setCloseFormClickHandler = (callback) => {
-        this._callback.closeFormClick = callback
-        // this.formOpenMode = !this.#formOpenMode
-        console.log(this.element.querySelector('.close-button'))
-        // this.element.querySelector('.close-button').addEventListener('click', this.#closeFormClickHandler)
     }
 
     #openFormClickHandler = (evt) => {
         evt.preventDefault()
         this._callback.openFormClick()
-    }
-
-    #closeFormClickHandler = (evt) => {
-        evt.preventDefault()
-        this._callback.closeFormClick()
     }
 
 }

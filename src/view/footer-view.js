@@ -21,4 +21,8 @@ export default class FooterView extends AbstractView {
     get template() {
         return createFooterTemplate(this.#todoItems)
     }
+
+    clearFooter = () => {
+        this.element.innerHTML = ''
+    }
 }
