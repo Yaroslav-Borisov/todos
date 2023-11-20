@@ -4,7 +4,6 @@ const createFooterTemplate = (todoItems) => {
     const activeItems = todoItems.filter(item => item.done === false).length
     const doneItems = todoItems.filter(item => item.done === true).length
 
-
     return `<footer class="app-footer">
                 ${activeItems} more to do, ${doneItems} done
             </footer>`
@@ -13,16 +12,12 @@ const createFooterTemplate = (todoItems) => {
 export default class FooterView extends AbstractView {
     #todoItems = null
 
-    constructor(todoItemsModel) {
+    constructor(todoItems) {
         super()
-        this.#todoItems = todoItemsModel.todoItems
+        this.#todoItems = todoItems
     }
 
     get template() {
         return createFooterTemplate(this.#todoItems)
-    }
-
-    clearFooter = () => {
-        this.element.innerHTML = ''
     }
 }

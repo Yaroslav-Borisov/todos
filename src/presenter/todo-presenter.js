@@ -12,7 +12,6 @@ import TodoListView from "../view/todo-list-view.js"
 const app = document.querySelector('#app')
 
 export default class TodoListPresenter {
-
     #todoItemsModel = new TodoItemsModel()
     #headerComponent = new HeaderView()
     #mainComponent = new MainView()
@@ -20,9 +19,6 @@ export default class TodoListPresenter {
     #todoListComponent = new TodoListView()
     #footerComponent = null
     #todoFormComponent = null
-
-    #todoItemsList = []
-    #filterType = FilterType.DEFAULT
     #formOpenMode = false
 
     constructor() {
@@ -31,8 +27,18 @@ export default class TodoListPresenter {
         this.#todoItemsModel.subscribe(this.#renderTodoList)
         this.#todoItemsModel.subscribe(this.#renderForm)
         this.#todoItemsModel.subscribe(this.#renderFooter)
+    }
 
-        this.#todoItemsList = this.#todoItemsModel.todoItems
+    get todoItems() {
+        return this.#todoItemsModel.todoItems
+    }
+
+    get filteredTodoItems() {
+        return this.#todoItemsModel.filteredTodoItems
+    }
+
+    get filterType() {
+        return this.#todoItemsModel.filterType
     }
 
     init = () => {
@@ -63,7 +69,7 @@ export default class TodoListPresenter {
             this.#filtersComponent.removeElement()
         }
 
-        this.#filtersComponent = new FiltersView(this.#filterType)
+        this.#filtersComponent = new FiltersView(this.filterType)
         render(this.#mainComponent, this.#filtersComponent, RenderPosition.BEFOREBEGIN)
         this.#initFiltersEvents()
     }
@@ -79,8 +85,8 @@ export default class TodoListPresenter {
             this.#renderTodoListContainer()
         }
 
-        for (let i = 0; i < this.#todoItemsList.length; i++) {
-            this.#renderTodoItem(this.#todoItemsList[i])
+        for (let i = 0; i < this.filteredTodoItems.length; i++) {
+            this.#renderTodoItem(this.filteredTodoItems[i])
         }
     }
 
@@ -89,7 +95,7 @@ export default class TodoListPresenter {
         render(this.#todoListComponent, todoItemComponent, RenderPosition.BEFOREEND)
 
         todoItemComponent.setItemDoneClickHandler((todoItemId) => {
-            this.#todoItemsModel.updateTodoItems(todoItemId)
+            this.#todoItemsModel.makeTodoItemDone(todoItemId)
         })
 
         todoItemComponent.setItemDeleteClickHandler((todoItemId) => {
@@ -102,7 +108,7 @@ export default class TodoListPresenter {
             this.#footerComponent.removeElement()
         }
 
-        this.#footerComponent = new FooterView(this.#todoItemsModel)
+        this.#footerComponent = new FooterView(this.todoItems)
         render(this.#mainComponent, this.#footerComponent, RenderPosition.AFTEREND)
     }
 
@@ -124,12 +130,22 @@ export default class TodoListPresenter {
 
     #initFormEvents = () => {
         this.#todoFormComponent.setOpenFormClickHandler(this.#changeFormMode)
+        this.#todoFormComponent.setCloseFormClickHandler(this.#changeFormMode)
+        this.#todoFormComponent.setAddNewTaskClickHandler(this.#addNewItem)
     }
 
     #changeFormMode = () => {
         this.#formOpenMode = !this.#formOpenMode
-        console.log(this.#formOpenMode)
+        this.#renderForm()
     }
 
+    #addNewItem = () => {
+        const newItemText = this.#todoFormComponent.inputTextContent
 
+        if (newItemText.trim().length !== 0) {
+            this.#todoItemsModel.addNewTodoItem(this.#todoFormComponent.inputTextContent)
+        }
+        
+        this.#changeFormMode()
+    }
 }

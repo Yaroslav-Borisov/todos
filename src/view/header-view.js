@@ -7,7 +7,6 @@ const createHeaderTemplate = () => {
 }
 
 export default class HeaderView extends AbstractView {
-
     get template() {
         return createHeaderTemplate()
     }

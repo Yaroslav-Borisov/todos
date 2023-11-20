@@ -6,12 +6,7 @@ const createTodoListTemplate = () => {
 }
 
 export default class TodoListView extends AbstractView {
-
     get template() {
         return createTodoListTemplate()
-    }
-
-    clearTodoList = () => {
-        this.element.innerHTML = ''
     }
 }
