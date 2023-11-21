@@ -1,0 +1,5 @@
+node_modules/
+
+# Собранные файлы (допишите самостоятельно)
+dist/bundle.js
+dist/index.html

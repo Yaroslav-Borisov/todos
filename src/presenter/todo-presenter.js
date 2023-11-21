@@ -145,7 +145,5 @@ export default class TodoListPresenter {
         if (newItemText.trim().length !== 0) {
             this.#todoItemsModel.addNewTodoItem(this.#todoFormComponent.inputTextContent)
         }
-        
-        this.#changeFormMode()
     }
 }

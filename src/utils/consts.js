@@ -10,3 +10,5 @@ export const FilterType = {
     ACTIVE: 'active',
     DONE: 'done'
 }
+
+export const BASE_URL = 'https://jsonplaceholder.typicode.com/'
